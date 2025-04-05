@@ -46,3 +46,8 @@ variable "instance_name" {
   description = "Tag name for the EC2 instance"
   type        = string
 }
+
+variable "dynamo_db_name" {
+  description = "Tag name for the EC2 instance"
+  type        = string
+}
