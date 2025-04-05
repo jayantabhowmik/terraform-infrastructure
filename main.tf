@@ -3,10 +3,10 @@ module "vpc" {
   version = "5.19.0"
 
 
-  name = "terraform-vpc"
+  name = "var.vpc_name"
   cidr = "10.0.0.0/16"
 
-  azs             = ["ap-south-1a", "ap-south-1b"]
+  azs             = var.vpc_azs
   public_subnets  = ["10.0.1.0/24"]
   private_subnets = ["10.0.2.0/24"]
 
@@ -24,7 +24,7 @@ module "security_group" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.3.0"
 
-  name        = "my-security-group"
+  name        = "var.SG_name"
   description = "Security group for EC2 instance allowing SSH and HTTP"
   vpc_id      = module.vpc.vpc_id
 
@@ -57,8 +57,8 @@ module "security_group" {
 }
 
 resource "aws_instance" "public_instance" {
-  ami                         = "ami-0e35ddab05955cf57"
-  instance_type               = "t2.micro"
+  ami                         = var.instance_ami
+  instance_type               = var.instance_type
   subnet_id                   = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [module.security_group.security_group_id]
   associate_public_ip_address = true
@@ -66,7 +66,7 @@ resource "aws_instance" "public_instance" {
   user_data = file("${path.module}/script.tpl")
 
   tags = {
-    Name = "Terraform-test-instance"
+    Name = var.instance_name
   }
 }
 
@@ -109,7 +109,7 @@ resource "aws_s3_bucket_policy" "vpc_flow_logs" {
         Principal = {
           Service = "delivery.logs.amazonaws.com"
         },
-        Action = "s3:PutObject",
+        Action   = "s3:PutObject",
         Resource = "${aws_s3_bucket.my_s3_bucket.arn}/*",
         Condition = {
           StringEquals = {
@@ -122,15 +122,15 @@ resource "aws_s3_bucket_policy" "vpc_flow_logs" {
         Principal = {
           Service = "delivery.logs.amazonaws.com"
         },
-        Action = "s3:GetBucketAcl",
+        Action   = "s3:GetBucketAcl",
         Resource = aws_s3_bucket.my_s3_bucket.arn
       }
     ]
   })
 }
 resource "aws_flow_log" "vpc_flow_logs" {
-  vpc_id          = module.vpc.vpc_id
-  log_destination = aws_s3_bucket.my_s3_bucket.arn
+  vpc_id               = module.vpc.vpc_id
+  log_destination      = aws_s3_bucket.my_s3_bucket.arn
   log_destination_type = "s3"
-  traffic_type    = "ALL"
+  traffic_type         = "ALL"
 }
