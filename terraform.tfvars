@@ -1,0 +1,5 @@
+vpc_name      = "terraform-vpc"
+SG_name       = "terraform-security-group"
+instance_ami  = "ami-0e35ddab05955cf57"
+instance_name = "Terraform-test-instance"
+instance_type = "t2.micro"
